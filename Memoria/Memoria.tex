@@ -1,0 +1,566 @@
+\documentclass{article}
+
+\usepackage{fancyhdr} % Required for custom headers
+\usepackage{lastpage} % Required to determine the last page for the footer
+\usepackage{extramarks} % Required for headers and footers
+\usepackage[usenames,dvipsnames]{color} % Required for custom colors
+\usepackage{graphicx} % Required to insert images
+\usepackage{listings} % Required for insertion of code
+\usepackage{courier} % Required for the courier font
+\usepackage{url}
+
+%----------------------------------------------------------------------------------------
+%	SPANISH LANGUAGE
+%----------------------------------------------------------------------------------------
+\usepackage{lmodern}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,activeacute]{babel}
+\usepackage[utf8]{inputenc} % Para poder incluir tildes y ñ automáticamente
+
+%----------------------------------------------------------------------------------------
+%	TODOs AND NOTES
+%----------------------------------------------------------------------------------------
+
+\usepackage{xargs}                      % Use more than one optional parameter in a new commands
+\usepackage[pdftex,dvipsnames]{xcolor}  % Coloured text etc.
+\usepackage[colorinlistoftodos,prependcaption,textsize=tiny]{todonotes}
+\newcommandx{\unsure}[2][1=]{\todo[linecolor=red,backgroundcolor=red!25,bordercolor=red,#1]{#2}}
+\newcommandx{\change}[2][1=]{\todo[linecolor=blue,backgroundcolor=blue!25,bordercolor=blue,#1]{#2}}
+\newcommandx{\info}[2][1=]{\todo[linecolor=OliveGreen,backgroundcolor=OliveGreen!25,bordercolor=OliveGreen,#1]{#2}}
+\newcommandx{\improvement}[2][1=]{\todo[linecolor=Plum,backgroundcolor=Plum!25,bordercolor=Plum,#1]{#2}}
+\newcommandx{\thiswillnotshow}[2][1=]{\todo[disable,#1]{#2}}
+
+%----------------------------------------------------------------------------------------
+%	MARGIN, HEADER AND FOOTER
+%----------------------------------------------------------------------------------------
+% Margins
+\topmargin=-0.45in
+\evensidemargin=0in
+\oddsidemargin=0in
+\textwidth=6.5in
+\textheight=9.0in
+\headsep=0.25in
+
+\linespread{1.1} % Line spacing
+
+% Set up the header and footer
+\pagestyle{fancy}
+\lhead{\textbf{Memoria Análisis de Redes.}} % Top left header
+\rhead{\textbf{Benjamín Cádiz de Gracia.}} % Top right header
+\lfoot{\lastxmark} % Bottom left footer
+\rfoot{Página\ \thepage\ de\ \protect\pageref{LastPage}} % Bottom right footer
+\renewcommand\headrulewidth{0.4pt} % Size of the header rule
+\renewcommand\footrulewidth{0.4pt} % Size of the footer rule
+
+\setlength\parindent{0pt} % Removes all indentation from paragraphs
+
+%----------------------------------------------------------------------------------------
+%	CODE INCLUSION CONFIGURATION
+%----------------------------------------------------------------------------------------
+\definecolor{gray97}{gray}{.97}
+\definecolor{gray75}{gray}{.75}
+\definecolor{gray45}{gray}{.45}
+\definecolor{comments}{RGB}{0,100,0}
+
+\lstset{ frame=Ltb,
+     framerule=0pt,
+     aboveskip=0.5cm,
+     framextopmargin=3pt,
+     framexbottommargin=3pt,
+     framexleftmargin=0.4cm,
+     framesep=0pt,
+     rulesep=.4pt,
+     backgroundcolor=\color{gray97},
+     %
+     stringstyle=\ttfamily\color{comments},
+     showstringspaces = false,
+     basicstyle=\footnotesize\ttfamily,
+     commentstyle=\itshape\color{gray45},
+	 keywordstyle=\bfseries\color{blue},
+     %
+     numbers=left,
+     numbersep=15pt,
+     numberstyle=\tiny,
+     numberfirstline = false,
+     breaklines=true,
+   }
+   
+\lstdefinestyle{ConfigFiles}{% define own style
+  language={[LaTeX]TeX},
+  basicstyle=\small\ttfamily,
+  linewidth=0.9\linewidth,
+  breaklines=true,
+  keywordstyle=\color{blue}\bfseries,
+  identifierstyle=\color{orange},
+  commentstyle=\color{cyan},
+  backgroundcolor=\color{OliveGreen},
+  tabsize=2,
+  morekeywords = {parameter},
+}
+
+\lstdefinestyle{consola}
+   {basicstyle=\scriptsize\bf\ttfamily,
+    backgroundcolor=\color{gray75},
+   }
+ 
+\lstdefinestyle{C}
+   {language=C,
+   }
+
+
+\begin{document}
+
+\begin{titlepage}
+\begin{center}
+\vspace*{-1in}
+\begin{figure}[htb]
+\begin{center}
+\includegraphics[width=5cm]{./images/uclm_logo.eps} 
+\hspace*{1.5in}
+\includegraphics[width=5cm]{./images/esi_logo.eps}
+\end{center}
+\end{figure}
+\end{center}
+\begin{center}
+UCLM - Escuela Superior de Informática - Ciudad Real\\
+\vspace*{0.6in}
+\vspace*{0.2in}
+\begin{Large}
+\textbf{Diseño e Infraestructura de Redes.} \\
+\textbf{Memoria Práctica 1.} \\
+\end{Large}
+\vspace*{0.3in}
+\vspace*{0.3in}
+\rule{80mm}{0.1mm}\\
+\vspace*{0.1in}
+\begin{large}
+Hecho por: \\
+Benjamín Cádiz de Gracia. \\
+\vspace*{0.3in}
+Fecha: Febrero de 2018.\\
+\end{large}
+\end{center}
+
+\end{titlepage}
+\tableofcontents
+%Cuerpo del documento
+\newpage
+
+\begin{center}
+\section{ Red Toroide.}
+\end{center}
+\subsection{Enunciado.}
+Dado un archivo con nombre \textit{datos.dat}, cuyo contenido es una lista de valores separados por comas, nuestro programa realizará lo siguiente:
+
+El proceso de rank 0 destribuirá a cada uno de los nodos de un toroide de lado L,los L x L numeros reales que estarán contenidos en el archivo datos.dat.
+En caso de que no se hayan lanzado suficientes elementos de proceso para los datos del programa, éste emitirá un error y todos los procesos finalizarán.
+En caso de que todos los procesos han recibido su correspondiente elemento, comenzará el proceso normal del programa.
+Se pide calcular el elemento menor de toda la red, el elemento de proceso con rank 0 mostrará en su salida estándar el valor obtenido.
+
+La complejidad del algoritmo no superará O(raiz\_cuadrada(n)) Con n número de elementos de la red.
+
+\subsection{Planteamiento de la solución.}
+
+Para obtener nuestra solución vamos a utilizar una \textit{red toroide}. La \textit{red toroide} es una malla que permite comunicar un dato con un vecino suyo. Nuestro planteamiento sera utilizar este tipo de red para mediante, primero por filas y despues por columnas, obtener el mínimo de todos los valores asociados a cada nodo de la red.
+
+
+\subsection{Diseño del programa}
+
+El programa está dividido en: 
+\begin{list}{•}{}
+\item \textbf{Main}. Un main principal, donde su función será la del algoritmo principal de obtener el número mas pequeño.
+\item \textbf{Obtener vecinos}. Una función donde podremos calcular la posición de todos y cada uno de los vecinos. Simplemente será una función para que cada nodo tenga una referencia de donde están todos sus vecinos.
+\item \textbf{Distribuir}. Un método cuya función será leer el fichero donde contiene los datos, y por cada dato se distribuirá con el fin de asignarlo a su nodo correspondiente.
+\item \textbf{Obtener}. Este método se complementa con el anterior, ya que recibirá el dato enviado y además, se asignará el dato.
+\end{list}
+
+\subsection{Flujo de datos en la red.}
+
+\subsection{Código fuente.}
+\begin{lstlisting}
+//
+//  red_toroide.c
+//  
+//
+//  Created by Benjamin Cadiz de Gracia on 27/2/18.
+//
+
+#include <mpi.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#define DATOS "Datos.dat"
+#define L 3
+
+void obtain_neighbors(int* north, int* south, int* east, int* west, int rank,
+                      int numtasks){
+    
+    *south = (rank + L) % numtasks;
+    
+    *north = (rank - L) % numtasks;
+    if(*north < 0){
+        *north += numtasks;
+    }
+    
+    *east = rank + 1;
+    if(*east % L == 0){
+        *east -= L;
+    }
+    
+    *west = (rank - 1) % numtasks;
+    if(*west % L == L-1){
+        *west += L;
+    }else if(*west == -1){
+        *west = L-1;
+    }
+}
+
+void distribuir(int numtask, int rank, float* token){
+    int i = 0;
+    int rc;
+    FILE* file;
+    float num[16];
+    MPI_Status status;
+    MPI_Request request;
+    float element=0;
+    
+    //Leemos el archivo.
+    if ((file=fopen(DATOS,"r"))==NULL){
+        fprintf(stderr, "Error opening the file\n");
+        exit(EXIT_FAILURE);
+    }else
+        while(!feof (file) & (i < numtask)){
+            fscanf (file,"%g,", &element);
+            
+            //Enviamos en el primer elemento.
+            if(i == rank){
+                *token = element;
+            }else{
+                rc = MPI_Isend(&element, 1, MPI_FLOAT, i, 1, MPI_COMM_WORLD, &request);
+                if (rc != MPI_SUCCESS) {
+                    printf("Send error in task %d\n", rank);
+                    MPI_Finalize();
+                    exit(1);
+                }
+                MPI_Wait(&request, &status);
+            }
+            i++;
+        }
+        fclose(file);
+}
+void obtain_token(float* token, int rank){
+    int rc;
+    
+    MPI_Status status;
+    rc = MPI_Recv(token, 1, MPI_FLOAT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+    if (rc != MPI_SUCCESS) {
+        printf("Receive error in task %d\n", rank);
+        MPI_Finalize();
+        exit(1);
+    }
+}
+
+int main(int argc, char** argv) {
+    float token;
+    FILE* file;
+    
+    int rank,size,numtask;
+    int  north,south,east,west;
+    
+    // Inicializacion de MPI.
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &numtask);
+    
+    //Obtenemos vecinos.
+    obtain_neighbors(&north,&south,&east,&west,rank,numtask);
+    
+    //Distribuimos los elementos del fichero en nuestros nodos.
+    if(rank == 0){
+        distribuir(numtask,rank, &token);
+    }else{
+        obtain_token(&token, rank);
+    }
+    
+    //Realizamos el algoritmo.
+    int rc;
+    float new_token;
+    MPI_Status status;
+    for( int i =0;i<L-1;i++){
+        rc = MPI_Send(&token,1, MPI_FLOAT, north,i,MPI_COMM_WORLD);
+        if (rc != MPI_SUCCESS){
+            printf("Receive error in task %d\n", rank);
+            MPI_Finalize();
+            exit(1);
+        }
+        rc = MPI_Recv(&new_token,1,MPI_FLOAT,south,MPI_ANY_TAG,MPI_COMM_WORLD,&status);
+        if (rc != MPI_SUCCESS){
+            printf("Receive error in task %d\n", rank);
+            MPI_Finalize();
+            exit(1);
+        }
+        if(new_token < token){
+            token = new_token;
+        }
+    }
+    
+    for( int i =0;i<L-1;i++){
+        rc = MPI_Send(&token,1, MPI_FLOAT, west,i,MPI_COMM_WORLD);
+        if (rc != MPI_SUCCESS){
+            printf("Receive error in task %d\n", rank);
+           	MPI_Finalize();
+            exit(1);
+        }
+        rc = MPI_Recv(&new_token,1,MPI_FLOAT,east,MPI_ANY_TAG,MPI_COMM_WORLD,&status);
+        if (rc != MPI_SUCCESS){
+            printf("Receive error in task %d\n", rank);
+            MPI_Finalize();
+            exit(1);
+        }
+        if(new_token < token)
+            token = new_token;
+    }
+    
+    if(rank ==0)
+        printf("The minimun value is:  %g \n",token);
+    
+    MPI_Finalize();
+    return EXIT_SUCCESS;
+}
+
+
+\end{lstlisting}
+
+\subsection{Compilación y ejecución.}
+
+Debemos situarnos en la carpeta donde están los archivos \textit{red\_toroide.c}, \textit{red\_hipercubo.c} y \textit{\textbf{Makefile}}. Allí abriremos una terminal y ejecutaremos:
+\begin{list}{•}{}
+\item Primero limpiamos todos los posibles ejecutables que haya en el proyecto.
+\begin{lstlisting}
+make clean
+\end{lstlisting}
+\item En segundo lugar compilaremos bien \textit{red\_toroide.c} o bien todo.
+\begin{lstlisting}
+make red_toroide		//Compila únicamente el toroide.
+make all					//Compila todo
+\end{lstlisting}
+\item En tercer lugar lanzaremos el ejecutable.
+\begin{lstlisting}
+make run_toroide
+\end{lstlisting}
+Cabe decir que por defecto nos viene 9 hilos para la ejecución.
+\end{list}
+ 
+\begin{center}
+\section{Red Hipercubo.}
+\end{center}
+\subsection{Enunciado.}
+Dado un archivo con nombre datos.dat, cuyo contenido es una lista de valores separados por comas, nuestro programa realizará lo siguiente:
+
+El proceso de rank 0 distribuirá a cada uno de los nodos de un Hipercubo de dimensión D, los $2^D$ números reales que estarán contenidos en el archivo datos.dat. En caso de que no se hayan lanzado suficientes elementos de proceso para los datos del programa, éste emitirá un error y todos los procesos finalizarán.
+En caso de que todos los procesos han recibido su correspondiente elemento, comenzará el proceso normal del programa.
+Se pide calcular el elemento mayor de toda la red, el elemento de proceso con rank 0 mostrará en su salida estándar el valor obtenido. 
+
+La complejidad del algoritmo no superará O(logaritmo\_base\_2(n)) )) Con n número de elementos de la red.
+
+\subsection{Planteamiento de la solución.}
+
+Para obtener nuestra solución vamos a utilizar una \textit{red toroide}. La \textit{red toroide} es una malla que permite comunicar un dato con un vecino suyo. Nuestro planteamiento sera utilizar este tipo de red para mediante, primero por filas y despues por columnas, obtener el mínimo de todos los valores asociados a cada nodo de la red.
+
+
+\subsection{Diseño del programa}
+
+El programa está dividido en: 
+\begin{list}{•}{}
+\item \textbf{Main}. Un main principal, donde su función será la del algoritmo principal de obtener el número mas pequeño.
+\item \textbf{Obtener vecinos}. Una función donde podremos calcular la posición de todos y cada uno de los vecinos. Simplemente será una función para que cada nodo tenga una referencia de donde están todos sus vecinos.
+\item \textbf{Distribuir}. Un método cuya función será leer el fichero donde contiene los datos, y por cada dato se distribuirá con el fin de asignarlo a su nodo correspondiente.
+\item \textbf{Obtener}. Este método se complementa con el anterior, ya que recibirá el dato enviado y además, se asignará el dato.
+\end{list}
+
+\subsection{Flujo de datos en la red.}
+
+\subsection{Código fuente.}
+
+\begin{lstlisting}
+//
+//  red_hipercubo.c
+//  
+//
+//  Created by Benjamin Cadiz de Gracia on 16/3/18.
+//
+
+#include <mpi.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+#define DATOS "Datos.dat"
+#define D 4
+
+int obtain_neighbor(int rank, int dimension){
+    int neighbor, node;
+    for(node = 0; node < (int)pow(2,D); node++){
+        if((rank ^ node) == (int)pow(2,dimension - 1)){
+            neighbor = node;
+            break;
+        }
+    }
+    return neighbor;
+}
+void distribuir(int numtask, int rank, float* token){
+    int i = 0;
+    int rc;
+    FILE* file;
+    float num[16];
+    MPI_Status status;
+    MPI_Request request;
+    float element=0;
+    
+    //Leemos el archivo.
+    if ((file=fopen(DATOS,"r"))==NULL){
+		fprintf(stderr, "Error opening the file\n");
+        exit(EXIT_FAILURE);
+    }else
+        while(!feof (file) & (i < numtask)){
+            fscanf (file,"%g,", &element);
+            
+            //Enviamos en el primer elemento.
+            if(i == rank){
+                *token = element;
+            }else{
+                rc = MPI_Isend(&element, 1, MPI_FLOAT, i, 1, MPI_COMM_WORLD, &request);
+                if (rc != MPI_SUCCESS) {
+                    printf("Send error in task %d\n", rank);
+                    MPI_Finalize();
+                    exit(1);
+                }
+                MPI_Wait(&request, &status);
+            }
+            i++;
+        }
+    fclose(file);
+}
+void obtain_token(float* token, int rank){
+    int rc;
+    
+    MPI_Status status;
+    rc = MPI_Recv(token, 1, MPI_FLOAT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+    if (rc != MPI_SUCCESS) {
+        printf("Receive error in task %d\n", rank);
+        MPI_Finalize();
+        exit(1);
+    }
+}
+
+int main(int argc, char** argv) {
+    float token;
+    
+    int rank,size,numtask;
+    FILE* file;
+    
+    // Inicializacion de MPI.
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &numtask);
+    
+    
+    //Distribuimos los elementos del fichero en nuestros nodos.
+    if(rank == 0){
+        distribuir(numtask,rank, &token);
+    }else{
+        obtain_token(&token, rank);
+    }
+    
+    //Realizamos el algoritmo.
+    int rc;
+    float new_token;
+    MPI_Status status;
+    for( int i =1;i<=D;i++){
+        rc = MPI_Send(&token,1, MPI_FLOAT,obtain_neighbor(rank, i),i,MPI_COMM_WORLD);
+        
+        if (rc != MPI_SUCCESS){
+            printf("Receive error in task %d\n", rank);
+            MPI_Finalize();
+            exit(1);
+        }
+        rc = MPI_Recv(&new_token,1,MPI_FLOAT,obtain_neighbor(rank, i),MPI_ANY_TAG,MPI_COMM_WORLD,&status);
+        if (rc != MPI_SUCCESS){
+            printf("Receive error in task %d\n", rank);
+            MPI_Finalize();
+            exit(1);
+        }
+        if(new_token > token){
+            token = new_token;
+        }
+    }
+    
+    if(rank ==0)
+        printf("The maximum value is:  %g \n",token);
+    MPI_Finalize();
+    return EXIT_SUCCESS;
+}
+
+
+\end{lstlisting}
+  
+\subsection{Compilación y ejecución.}
+
+Debemos situarnos en la carpeta donde están los archivos \textit{red\_toroide.c}, \textit{red\_hipercubo.c} y \textit{\textbf{Makefile}}. Allí abriremos una terminal y ejecutaremos:
+\begin{list}{•}{}
+\item Primero limpiamos todos los posibles ejecutables que haya en el proyecto.
+\begin{lstlisting}
+make clean
+\end{lstlisting}
+\item En segundo lugar compilaremos bien \textit{red\_hipercubo.c} o bien todo.
+\begin{lstlisting}
+make red_hipercubo	//Compila únicamente el toroide.
+make all					//Compila todo
+\end{lstlisting}
+\item En tercer lugar lanzaremos el ejecutable.
+\begin{lstlisting}
+make run_toroide
+\end{lstlisting}
+Cabe decir que por defecto nos viene 16 hilos para la ejecución.
+\end{list}
+
+\begin{center}
+\section{Makefile.}
+\end{center}
+
+\begin{lstlisting}
+#!/usr/bin/make -f
+# -*- mode:makefile -*-
+
+CC := mpicc
+DIREXEC := ejecutables/
+RUN := mpirun
+
+dirs:
+	mkdir -p $(DIREXEC)
+
+red_toroide: dirs
+	$(CC) red_toroide.c -o $(DIREXEC)toroide
+
+red_hipercubo: dirs
+	$(CC) red_hipercubo.c -o $(DIREXEC)hipercubo
+
+all: red_toroide red_hipercubo
+
+run_hipercubo: red_hipercubo
+	$(RUN) -n 16 $(DIREXEC)hipercubo
+
+run_toroide: red_toroide
+	$(RUN) -n 9 $(DIREXEC)toroide
+
+clean:
+	rm -rf $(DIREXEC)
+
+
+
+\end{lstlisting}
+ 
+ 
+
+\newpage
+\end{document}
